@@ -2,22 +2,32 @@ const express = require('express')
 const router = express.Router()
 const multer = require('multer')
 const path = require('path')
+const cloudinary = require('cloudinary').v2
+const { CloudinaryStorage } = require('multer-storage-cloudinary')
 const pool = require('../db/pool')
 const auth = require('../middleware/auth')
 const { generateDefectPDF } = require('../utils/pdfGenerator')
 
-// Multer config — store photos in /uploads
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, path.join(__dirname, '../uploads')),
-  filename: (req, file, cb) => {
-    const unique = `${Date.now()}-${Math.round(Math.random() * 1e9)}`
-    cb(null, `${unique}${path.extname(file.originalname)}`)
+// Cloudinary config
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+})
+
+// Multer config — store photos in Cloudinary
+const storage = new CloudinaryStorage({
+  cloudinary,
+  params: {
+    folder: 'eic-sitesight',
+    allowed_formats: ['jpg', 'jpeg', 'png', 'webp'],
+    transformation: [{ width: 1280, crop: 'limit' }],
   },
 })
 
 const upload = multer({
   storage,
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB max
+  limits: { fileSize: 5 * 1024 * 1024 },
   fileFilter: (req, file, cb) => {
     const allowedMimes = /jpeg|jpg|png|webp|octet-stream/
     const allowedExts = /jpeg|jpg|png|webp/
@@ -41,10 +51,12 @@ router.post('/', upload.single('photo'), async (req, res) => {
   }
 
   try {
+    const photoUrl = req.file.path
+
     const result = await pool.query(
       `INSERT INTO defect_reports (defect_type, materials_required, notes, photo_path, latitude, longitude)
        VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
-      [defect_type, materials_required || null, notes || null, req.file.filename, latitude, longitude]
+      [defect_type, materials_required || null, notes || null, photoUrl, latitude, longitude]
     )
     res.status(201).json(result.rows[0])
   } catch (err) {
