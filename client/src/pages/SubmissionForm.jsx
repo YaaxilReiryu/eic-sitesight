@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import imageCompression from 'browser-image-compression'
-import axios from 'axios'
+import api from '../api'
 
 const DEFECT_TYPES = [
   'Pothole',
@@ -80,7 +80,7 @@ export default function SubmissionForm() {
       formData.append('longitude', gps.longitude)
       formData.append('photo', photo)
 
-      await axios.post('/api/reports', formData, {
+      await api.post('/api/reports', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       })
 

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import axios from 'axios'
+import api from '../api'
 
 const STATUS_COLORS = {
   Pending: 'bg-yellow-100 text-yellow-800',
@@ -25,7 +25,7 @@ export default function Dashboard() {
       if (filters.defect_type) params.defect_type = filters.defect_type
       if (filters.date) params.date = filters.date
 
-      const res = await axios.get('/api/reports', {
+      const res = await api.get('/api/reports', {
         headers: { Authorization: `Bearer ${token}` },
         params,
       })

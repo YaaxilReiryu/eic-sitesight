@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import axios from 'axios'
+import api from '../api'
 
 const STATUS_ORDER = ['Pending', 'Ongoing', 'Done']
 const STATUS_COLORS = {
@@ -21,7 +21,7 @@ export default function ReportDetail() {
 
   const fetchReport = async () => {
     try {
-      const res = await axios.get(`/api/reports/${id}`, {
+      const res = await api.get(`/api/reports/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       setReport(res.data)
@@ -42,7 +42,7 @@ export default function ReportDetail() {
   const handleStatusUpdate = async (newStatus) => {
     try {
       setUpdating(true)
-      await axios.patch(`/api/reports/${id}/status`,
+      await api.patch(`/api/reports/${id}/status`,
         { status: newStatus },
         { headers: { Authorization: `Bearer ${token}` } }
       )
@@ -57,7 +57,7 @@ export default function ReportDetail() {
   const handleGeneratePDF = async () => {
     try {
       setGenerating(true)
-      const res = await axios.get(`/api/reports/${id}/pdf`, {
+      const res = await api.get(`/api/reports/${id}/pdf`, {
         headers: { Authorization: `Bearer ${token}` },
         responseType: 'blob',
       })
@@ -97,7 +97,7 @@ export default function ReportDetail() {
         {report.photo_path && (
           <div className="bg-white rounded-xl shadow overflow-hidden">
             <img
-              src={`http://localhost:5000/uploads/${report.photo_path}`}
+              src={`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/uploads/${report.photo_path}`}
               alt="Defect"
               className="w-full max-h-72 object-cover"
             />
