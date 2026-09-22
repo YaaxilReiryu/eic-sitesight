@@ -97,7 +97,7 @@ export default function ReportDetail() {
         {report.photo_path && (
           <div className="bg-white rounded-xl shadow overflow-hidden">
             <img
-              src={`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/uploads/${report.photo_path}`}
+              src={report.photo_path}
               alt="Defect"
               className="w-full max-h-72 object-cover"
             />
