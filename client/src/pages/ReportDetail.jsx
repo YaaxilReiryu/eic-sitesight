@@ -57,11 +57,13 @@ export default function ReportDetail() {
   const handleGeneratePDF = async () => {
     try {
       setGenerating(true)
-      const res = await api.get(`/api/reports/${id}/pdf`, {
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000'
+      const res = await fetch(`${apiUrl}/api/reports/${id}/pdf`, {
         headers: { Authorization: `Bearer ${token}` },
-        responseType: 'blob',
       })
-      const url = window.URL.createObjectURL(new Blob([res.data]))
+      if (!res.ok) throw new Error('Failed to generate PDF')
+      const blob = await res.blob()
+      const url = window.URL.createObjectURL(blob)
       const link = document.createElement('a')
       link.href = url
       link.setAttribute('download', `defect-report-${id}.pdf`)
@@ -81,7 +83,6 @@ export default function ReportDetail() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
       <div className="bg-blue-700 text-white px-6 py-4 shadow flex items-center gap-4">
         <button onClick={() => navigate('/admin/dashboard')} className="text-blue-200 hover:text-white">
           ← Back
@@ -93,6 +94,7 @@ export default function ReportDetail() {
       </div>
 
       <div className="max-w-2xl mx-auto p-6 space-y-6">
+
         {/* Photo */}
         {report.photo_path && (
           <div className="bg-white rounded-xl shadow overflow-hidden">
@@ -105,8 +107,16 @@ export default function ReportDetail() {
         )}
 
         {/* Details */}
-        <div className="bg-white rounded-xl shadow p-6 space-y-4">
+        <div className="bg-white rounded-xl shadow p-6">
           <div className="grid grid-cols-2 gap-4">
+            <div>
+              <p className="text-xs text-gray-400 uppercase font-semibold">Submitted By</p>
+              <p className="text-gray-800 font-medium mt-1">{report.submitter_name || '—'}</p>
+            </div>
+            <div>
+              <p className="text-xs text-gray-400 uppercase font-semibold">Phone Number</p>
+              <p className="text-gray-800 mt-1">{report.submitter_phone || '—'}</p>
+            </div>
             <div>
               <p className="text-xs text-gray-400 uppercase font-semibold">Defect Type</p>
               <p className="text-gray-800 font-medium mt-1">{report.defect_type}</p>

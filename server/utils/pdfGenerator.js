@@ -28,7 +28,7 @@ async function generateDefectPDF(report) {
       doc.on('end', () => resolve(Buffer.concat(buffers)))
       doc.on('error', reject)
 
-      // Header
+      // ── Header ──────────────────────────────────────────────
       doc.rect(0, 0, doc.page.width, 80).fill('#1d4ed8')
       doc.fillColor('white')
          .fontSize(20)
@@ -42,7 +42,7 @@ async function generateDefectPDF(report) {
          .fontSize(10)
          .text(`Report ID: #${report.id}`, 50, 62)
 
-      // Status Badge — top right corner, no moveDown
+      // ── Status Badge — positioned absolutely, no moveDown ───
       const statusColor = report.status === 'Done' ? '#16a34a'
         : report.status === 'Ongoing' ? '#2563eb' : '#d97706'
 
@@ -52,11 +52,11 @@ async function generateDefectPDF(report) {
          .font('Helvetica-Bold')
          .text(report.status, doc.page.width - 130, 27, { width: 80, align: 'center' })
 
-      // Reset position after header
+      // ── Reset position after header ──────────────────────────
       doc.y = 100
       doc.x = 50
 
-      // Defect Information
+      // ── Section: Defect Information ──────────────────────────
       doc.fillColor('#1e3a8a')
          .fontSize(13)
          .font('Helvetica-Bold')
@@ -66,6 +66,8 @@ async function generateDefectPDF(report) {
       doc.moveDown(0.5)
 
       const fields = [
+        ['Submitted By', report.submitter_name || 'Not specified'],
+        ['Phone Number', report.submitter_phone || 'Not specified'],
         ['Defect Type', report.defect_type],
         ['Materials Required', report.materials_required || 'Not specified'],
         ['Notes', report.notes || 'None'],
@@ -79,7 +81,7 @@ async function generateDefectPDF(report) {
         doc.moveDown(0.6)
       })
 
-      // GPS Location
+      // ── Section: GPS Location ────────────────────────────────
       doc.moveDown(0.3)
       doc.fillColor('#1e3a8a')
          .fontSize(13)
@@ -101,7 +103,7 @@ async function generateDefectPDF(report) {
            { link: `https://maps.google.com/?q=${report.latitude},${report.longitude}`, underline: true }
          )
 
-      // Defect Photo
+      // ── Section: Defect Photo ────────────────────────────────
       if (report.photo_path) {
         try {
           const imageBuffer = await fetchImageBuffer(report.photo_path)
@@ -123,7 +125,7 @@ async function generateDefectPDF(report) {
         }
       }
 
-      // Footer
+      // ── Footer ───────────────────────────────────────────────
       doc.moveDown(2)
       doc.moveTo(50, doc.y).lineTo(545, doc.y).strokeColor('#e5e7eb').lineWidth(1).stroke()
       doc.moveDown(0.5)

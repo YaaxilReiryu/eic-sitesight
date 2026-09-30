@@ -40,7 +40,7 @@ const upload = multer({
 
 // POST /api/reports — public, no auth
 router.post('/', upload.single('photo'), async (req, res) => {
-  const { defect_type, materials_required, notes, latitude, longitude } = req.body
+  const { submitter_name, submitter_phone, defect_type, materials_required, notes, latitude, longitude } = req.body
 
   if (!defect_type || !latitude || !longitude) {
     return res.status(400).json({ message: 'Defect type and GPS coordinates are required.' })
@@ -54,9 +54,9 @@ router.post('/', upload.single('photo'), async (req, res) => {
     const photoUrl = req.file.path
 
     const result = await pool.query(
-      `INSERT INTO defect_reports (defect_type, materials_required, notes, photo_path, latitude, longitude)
-       VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
-      [defect_type, materials_required || null, notes || null, photoUrl, latitude, longitude]
+      `INSERT INTO defect_reports (submitter_name, submitter_phone, defect_type, materials_required, notes, photo_path, latitude, longitude)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
+      [submitter_name || null, submitter_phone || null, defect_type, materials_required || null, notes || null, photoUrl, latitude, longitude]
     )
     res.status(201).json(result.rows[0])
   } catch (err) {
