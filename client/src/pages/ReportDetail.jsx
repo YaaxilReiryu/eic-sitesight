@@ -58,7 +58,7 @@ export default function ReportDetail() {
     try {
       setGenerating(true)
       const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000'
-      const res = await fetch(`${apiUrl}/api/reports/${id}/pdf`, {
+      const res = await fetch(`${apiUrl.replace(/\/$/, '')}/api/reports/${id}/pdf`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       if (!res.ok) throw new Error('Failed to generate PDF')
